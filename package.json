@@ -1,0 +1,327 @@
+{
+  "name": "vma-assembler",
+  "displayName": "VMA — Visual Macro Assembler",
+  "description": "Language support for VMA (Visual Macro Assembler) — the 6502 / 6510 assembler of C64 Visual Assembler",
+  "version": "0.1.0",
+  "publisher": "zsolt-tarczali",
+  "author": {
+    "name": "Zsolt Tarczali"
+  },
+  "license": "GPL-3.0-or-later",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Formatters"
+  ],
+  "activationEvents": [
+    "onLanguage:vma"
+  ],
+  "icon": "images/icon.png",
+  "keywords": [
+    "vma",
+    "visual macro assembler",
+    "visual assembler",
+    "6502",
+    "6510",
+    "c64",
+    "commodore 64",
+    "assembler",
+    "retro"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zstarczali/VMAExtension"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "vma",
+        "aliases": [
+          "VMA",
+          "Visual Macro Assembler",
+          "vma"
+        ],
+        "extensions": [
+          ".vma",
+          ".asm"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "vma",
+        "scopeName": "source.vma",
+        "path": "./syntaxes/vma.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "vma",
+        "path": "./snippets/vma.json"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "vma",
+        "required": [
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "The VMA source file to assemble"
+          },
+          "output": {
+            "type": "string",
+            "description": "Output .prg file path"
+          },
+          "d64": {
+            "type": "boolean",
+            "description": "Also produce a .d64 disk image (--d64)"
+          },
+          "crt": {
+            "type": "boolean",
+            "description": "Produce a Magic Desk .crt cartridge (--crt)"
+          },
+          "noBasicStub": {
+            "type": "boolean",
+            "description": "No 10 SYS BASIC line in front of the code (--no-basic-stub)"
+          },
+          "raw": {
+            "type": "boolean",
+            "description": "The image alone at its first ORG (--raw)"
+          },
+          "debug": {
+            "type": "boolean",
+            "description": "Also produce .sym, .vs and .dbg debugger files (--debug)"
+          },
+          "runAfterBuild": {
+            "type": "boolean",
+            "description": "Launch VICE emulator after successful build"
+          },
+          "exo": {
+            "type": "boolean",
+            "description": "Run Exomizer on the .prg after a successful build"
+          }
+        }
+      }
+    ],
+    "problemMatchers": [
+      {
+        "name": "vma",
+        "owner": "vma",
+        "fileLocation": [
+          "autoDetect",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.+?):(\\d+):\\s+(.+)$",
+          "file": 1,
+          "line": 2,
+          "message": 3
+        }
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorLangId == vma",
+          "command": "vma.build",
+          "group": "vma@1"
+        },
+        {
+          "when": "editorLangId == vma",
+          "command": "vma.buildAndRun",
+          "group": "vma@2"
+        },
+        {
+          "when": "editorLangId == vma",
+          "command": "vma.buildD64",
+          "group": "vma@3"
+        },
+        {
+          "when": "editorLangId == vma",
+          "command": "vma.buildExo",
+          "group": "vma@4"
+        },
+        {
+          "when": "editorLangId == vma",
+          "command": "vma.buildExoRun",
+          "group": "vma@5"
+        },
+        {
+          "when": "editorLangId == vma",
+          "command": "vma.buildDebug",
+          "group": "vma@6"
+        },
+        {
+          "when": "editorLangId == vma",
+          "command": "vma.buildDebugRun",
+          "group": "vma@7"
+        },
+        {
+          "when": "editorLangId == vma",
+          "command": "vma.buildCrt",
+          "group": "vma@8"
+        },
+        {
+          "when": "editorLangId == vma",
+          "command": "vma.format",
+          "group": "vma@9"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "vma.build",
+        "title": "Build (.prg)",
+        "category": "VMA",
+        "icon": "$(play)"
+      },
+      {
+        "command": "vma.buildAndRun",
+        "title": "Build & Run in VICE",
+        "category": "VMA",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "vma.buildD64",
+        "title": "Build + D64 disk image",
+        "category": "VMA",
+        "icon": "$(save-all)"
+      },
+      {
+        "command": "vma.buildAndRunD64",
+        "title": "Build D64 & Run in VICE",
+        "category": "VMA",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "vma.buildExo",
+        "title": "Build + Exomize",
+        "category": "VMA",
+        "icon": "$(archive)"
+      },
+      {
+        "command": "vma.buildExoRun",
+        "title": "Build + Exomize & Run in VICE",
+        "category": "VMA",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "vma.buildDebug",
+        "title": "Build (debug symbols)",
+        "category": "VMA",
+        "icon": "$(debug)"
+      },
+      {
+        "command": "vma.buildDebugRun",
+        "title": "Build (debug symbols) & Run in VICE with labels",
+        "category": "VMA",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "vma.buildCrt",
+        "title": "Build (.crt cartridge)",
+        "category": "VMA",
+        "icon": "$(package)"
+      },
+      {
+        "command": "vma.buildAndRunCrt",
+        "title": "Build .crt & Run in VICE",
+        "category": "VMA",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "vma.format",
+        "title": "Format Document",
+        "category": "VMA",
+        "icon": "$(symbol-keyword)"
+      }
+    ],
+    "configuration": {
+      "title": "VMA",
+      "properties": {
+        "vma.compilerPath": {
+          "type": "string",
+          "default": "vma",
+          "description": "Path to the VMA compiler executable (e.g. C:\\tools\\vma.exe)"
+        },
+        "vma.vicePath": {
+          "type": "string",
+          "default": "x64sc",
+          "description": "Path to the VICE C64 emulator executable (e.g. C:\\VICE\\x64sc.exe). Used by 'Build & Run'."
+        },
+        "vma.viceArgs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Extra command-line arguments passed to VICE (e.g. [\"-fullscreen\", \"-joydev2\", \"4\"])"
+        },
+        "vma.defaultOutputDir": {
+          "type": "string",
+          "default": "",
+          "description": "Default output directory for the built .prg / .d64 / .crt files (empty = same directory as source file)"
+        },
+        "vma.searchDirs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Further folders where .incbin / .koala / .level / .sid / .include files are looked up after the source's folder (passed via --search)"
+        },
+        "vma.basicStub": {
+          "type": "boolean",
+          "default": true,
+          "description": "Put a 10 SYS BASIC line in front of the code. Off = pass --no-basic-stub"
+        },
+        "vma.d64AddFiles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Extra files to put on the .d64 disk image when using the D64 commands (passed via --add)"
+        },
+        "vma.diskName": {
+          "type": "string",
+          "default": "",
+          "description": "Disk name of the .d64 image (--disk-name; empty = the D64's file name)"
+        },
+        "vma.crtName": {
+          "type": "string",
+          "default": "",
+          "description": "Cartridge name in the CRT header (--crt-name; empty = VA CART)"
+        },
+        "vma.exomizerPath": {
+          "type": "string",
+          "default": "exomizer",
+          "description": "Path to the Exomizer executable (e.g. C:\\tools\\exomizer.exe)"
+        },
+        "vma.exomizerMode": {
+          "type": "string",
+          "enum": ["sfx sys", "sfx basic", "mem"],
+          "default": "sfx sys",
+          "description": "Exomizer compression mode: 'sfx sys' (self-extractor, SYS start), 'sfx basic' (self-extractor, BASIC start), 'mem' (raw compressed data)"
+        },
+        "vma.exomizerSuffix": {
+          "type": "string",
+          "default": "_exo",
+          "description": "Suffix appended to the .prg base name for the Exomizer output file (e.g. '_exo' → 'prog_exo.prg')"
+        }
+      }
+    }
+  },
+  "main": "./out/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.60.0",
+    "typescript": "^5.0.0"
+  }
+}

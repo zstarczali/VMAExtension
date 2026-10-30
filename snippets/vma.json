@@ -1,0 +1,553 @@
+{
+  "Program skeleton": {
+    "prefix": "program",
+    "body": [
+      "; ${1:Program name}",
+      "* = \\$${2:0810}",
+      "",
+      "start:",
+      "    sei",
+      "    ${0}",
+      "    cli",
+      "    rts"
+    ],
+    "description": "Program skeleton: ORG, start label, SEI … CLI, RTS (the BASIC SYS stub is added by vma)"
+  },
+  "Entry point comment": {
+    "prefix": "entry",
+    "body": ["; Entry point: \\$${1:1000}"],
+    "description": "First-line comment that sets the address the BASIC SYS line jumps to"
+  },
+  "ORG": {
+    "prefix": "org",
+    "body": ["* = \\$${1:C000}"],
+    "description": "* = $xxxx — assemble from this address"
+  },
+  "PC (Kick style)": {
+    "prefix": ".pc",
+    "body": [".pc = \\$${1:1000}"],
+    "description": ".pc = $xxxx — Kick-style ORG"
+  },
+  "Label": {
+    "prefix": "label",
+    "body": ["${1:name}:", "    ${0}"],
+    "description": "A label (the colon is required)"
+  },
+  "Subroutine": {
+    "prefix": "sub",
+    "body": [
+      "${1:name}:",
+      "    ${0}",
+      "    rts"
+    ],
+    "description": "A subroutine: label … RTS"
+  },
+  "Scope": {
+    "prefix": "scope",
+    "body": [
+      "${1:name}: {",
+      "    ${0}",
+      "}"
+    ],
+    "description": "Kick-style scope: the labels inside are local to the name (name.label from outside)"
+  },
+
+  ".byte": {
+    "prefix": ".byte",
+    "body": [".byte ${1:\\$00}"],
+    "description": "Raw bytes inline (like DATA in BASIC)"
+  },
+  ".word": {
+    "prefix": ".word",
+    "body": [".word ${1:\\$0000}"],
+    "description": "16-bit little-endian words inline"
+  },
+  ".fill": {
+    "prefix": ".fill",
+    "body": [".fill ${1:256}, ${2:\\$00}"],
+    "description": ".fill count, value — repeat a byte value"
+  },
+  ".align": {
+    "prefix": ".align",
+    "body": [".align ${1:\\$100}"],
+    "description": "Pad to the next multiple of the given boundary"
+  },
+  ".text (screen)": {
+    "prefix": ".text",
+    "body": [".text ${1:0}, ${2:0}, \"${3:HELLO}\"${4:, lower}"],
+    "description": ".text col, row, \"text\"[, lower] — write text on the screen"
+  },
+  ".text (Kick encoded bytes)": {
+    "prefix": ".textk",
+    "body": [".text \"${1:hello}\""],
+    "description": ".text \"…\" without coordinates: the encoded bytes (see .encoding)"
+  },
+  ".encoding": {
+    "prefix": ".encoding",
+    "body": [".encoding \"${1|screencode_mixed,screencode_upper,petscii_mixed,petscii_upper,ascii|}\""],
+    "description": "The encoding of the following Kick-style .text lines"
+  },
+  ".string": {
+    "prefix": ".string",
+    "body": [".string \\$${1:C000}, \"${2:HELLO}\"${3: :${4:my_string}}"],
+    "description": ".string addr, \"text\"[, 80][, lower] [:label] — screen-code string at an address"
+  },
+  ".data": {
+    "prefix": ".data",
+    "body": [".data \\$${1:C000}, ${2:\\$01, \\$02, \\$03}${3: :${4:mydata}}"],
+    "description": ".data addr, bytes… [:label] — bytes at an address"
+  },
+  ".rawbytes": {
+    "prefix": ".rawbytes",
+    "body": [".rawbytes \\$${1:C000}, ${2:\\$00, \\$00}${3: :${4:name}}"],
+    "description": ".rawbytes addr, bytes… [:label] — raw bytes at an address"
+  },
+  ".rawtext": {
+    "prefix": ".rawtext",
+    "body": [".rawtext \\$${1:C000}, \"${2:HELLO}\"${3: :${4:my_text}}"],
+    "description": ".rawtext addr, \"text\"[, 80][, lower] [:label] — screen codes at an address"
+  },
+  ".petscii": {
+    "prefix": ".petscii",
+    "body": [".petscii \\$${1:C000}, \"${2:HELLO}\"${3:, null}${4: :${5:my_msg}}"],
+    "description": ".petscii addr, \"text\"[, lower][, null] [:label] — PETSCII string"
+  },
+  ".charset": {
+    "prefix": ".charset",
+    "body": [".charset ${1|lower,upper|}"],
+    "description": "Switch the ROM charset (lower / upper)"
+  },
+  ".chardef": {
+    "prefix": ".chardef",
+    "body": [".chardef \\$${1:3800}, ${2:65}, ${3:\\$18,\\$3C,\\$66,\\$7E,\\$66,\\$66,\\$66,\\$00}"],
+    "description": ".chardef charset, code, 8 bytes — redefine a character"
+  },
+  ".table": {
+    "prefix": ".table",
+    "body": [".table ${1:name}${2: \\$${3:C000}}"],
+    "description": ".table name [addr] — a lookup table"
+  },
+  ".incbin": {
+    "prefix": ".incbin",
+    "body": [".incbin \"${1:file.bin}\", \\$${2:C000}"],
+    "description": ".incbin \"file\", addr — include a binary file"
+  },
+  ".koala": {
+    "prefix": ".koala",
+    "body": [".koala \"${1:picture.koa}\"${2:, \\$2000}"],
+    "description": "Load and show a Koala multicolor bitmap"
+  },
+  ".level": {
+    "prefix": ".level",
+    "body": [".level \"${1:level.bin}\"${2:, \\$4000}"],
+    "description": "Include a level of the C64 Visual Assembler level editor"
+  },
+  ".level_row": {
+    "prefix": ".level_row",
+    "body": [".level_row ${1:dst_lo}, ${2:view_x}${3:, color}"],
+    "description": "Copy one row of the level to the screen"
+  },
+  ".sid": {
+    "prefix": ".sid",
+    "body": [".sid \"${1:music.sid}\"${2:, \\$1000}"],
+    "description": "Include a SID tune"
+  },
+  ".sid_player": {
+    "prefix": ".sid_player",
+    "body": [".sid_player${1: ${2:1}, \\$${3:80}}"],
+    "description": "Play the .sid tune from a raster IRQ"
+  },
+  ".include": {
+    "prefix": ".include",
+    "body": [".include \"${1:macros.inc}\""],
+    "description": "Include a source / library file"
+  },
+
+  ".loop / .next": {
+    "prefix": ".loop",
+    "body": [
+      ".loop ${1|X,Y|}, ${2:10}, ${3:loop0}",
+      "    ${0}",
+      ".next ${3}"
+    ],
+    "description": "Counted loop on X or Y"
+  },
+  ".for / .endf": {
+    "prefix": ".for",
+    "body": [
+      ".for ${1|X,Y|}, \\$${2:12}, ${3:for0}",
+      "    ${0}",
+      ".endf ${3}"
+    ],
+    "description": "FOR loop on X or Y"
+  },
+  ".push / .pull": {
+    "prefix": ".push",
+    "body": [
+      ".push ${1:AXY}",
+      "${0}",
+      ".pull ${1}"
+    ],
+    "description": "Save and restore registers on the stack"
+  },
+  ".end": {
+    "prefix": ".end",
+    "body": [".end"],
+    "description": "End of the program (RTS alias)"
+  },
+
+  ".macro / .endm": {
+    "prefix": ".macro",
+    "body": [
+      ".macro ${1:name} ${2:param}",
+      "    ${0:lda {${2}\\}}",
+      ".endm"
+    ],
+    "description": "Define a macro; parameters are written as {param} in the body"
+  },
+  ".macro { } (Kick style)": {
+    "prefix": ".macrok",
+    "body": [
+      ".macro ${1:name}(${2:param}) {",
+      "    ${0}",
+      "}"
+    ],
+    "description": "Kick-style macro with a { } body"
+  },
+  ".invoke": {
+    "prefix": ".invoke",
+    "body": [".invoke ${1:name}(${2:args})"],
+    "description": "Call a macro"
+  },
+  ".call": {
+    "prefix": ".call",
+    "body": [".call ${1:name}(${2:args})"],
+    "description": "Call a macro (synonym of .invoke)"
+  },
+  ":macro call": {
+    "prefix": ":call",
+    "body": [":${1:name}(${2:args})"],
+    "description": "Kick-style macro call"
+  },
+  ".region / .endregion": {
+    "prefix": ".region",
+    "body": [
+      ".region ${1:name}",
+      "    ${0}",
+      ".endregion"
+    ],
+    "description": "Foldable region (0 bytes)"
+  },
+
+  ".define": {
+    "prefix": ".define",
+    "body": [".define ${1:DEBUG}"],
+    "description": "Turn on assembly-time symbols"
+  },
+  ".if / .endif": {
+    "prefix": ".if",
+    "body": [
+      ".if ${1:DEBUG}",
+      "    ${0}",
+      ".endif"
+    ],
+    "description": "Assembly-time IF (or runtime IF with a register condition)"
+  },
+  ".if / .else / .endif": {
+    "prefix": ".ifelse",
+    "body": [
+      ".if ${1:DEBUG}",
+      "    ${2}",
+      ".else",
+      "    ${0}",
+      ".endif"
+    ],
+    "description": "Assembly-time IF / ELSE"
+  },
+  "runtime .if": {
+    "prefix": ".ifr",
+    "body": [
+      ".if ${1|A,X,Y|} ${2|==,!=,<,>,<=,>=|} #\\$${3:10}",
+      "    ${4}",
+      ".else",
+      "    ${0}",
+      ".endif"
+    ],
+    "description": "Runtime IF on a register"
+  },
+  ".while / .endw": {
+    "prefix": ".while",
+    "body": [
+      ".while ${1|A,X,Y|} ${2|!=,==,<,>,<=,>=|} #\\$${3:00}",
+      "    ${0}",
+      ".endw"
+    ],
+    "description": "Runtime WHILE loop"
+  },
+  ".repeat / .until": {
+    "prefix": ".repeat",
+    "body": [
+      ".repeat",
+      "    ${0}",
+      ".until ${1|A,X,Y|} ${2|==,!=,<,>,<=,>=|} #\\$${3:00}"
+    ],
+    "description": "Runtime REPEAT … UNTIL loop"
+  },
+  ".assert": {
+    "prefix": ".assert",
+    "body": [".assert ${1:* < \\$A000}${2:, \"${3:message}\"}"],
+    "description": "Stop the build when the expression is false"
+  },
+  ".const": {
+    "prefix": ".const",
+    "body": [".const ${1:NAME} = ${2:\\$0400}"],
+    "description": "A constant"
+  },
+  ".label": {
+    "prefix": ".label",
+    "body": [".label ${1:NAME} = ${2:*}"],
+    "description": "Kick-style label / constant"
+  },
+  ".var": {
+    "prefix": ".var",
+    "body": [".var ${1:counter}${2:, ${3:2}}"],
+    "description": "Reserve a variable (bytes)"
+  },
+
+  ".memcpy": {
+    "prefix": ".memcpy",
+    "body": [".memcpy src=\\$${1:C000}, dst=\\$${2:D000}, size=\\$${3:0100}"],
+    "description": "Copy a block of memory"
+  },
+  ".memset": {
+    "prefix": ".memset",
+    "body": [".memset addr=\\$${1:0400}, value=#\\$${2:20}, size=\\$${3:03E8}"],
+    "description": "Fill a block of memory"
+  },
+  ".print": {
+    "prefix": ".print",
+    "body": [".print \"${1:HELLO}\"${2:, lower}"],
+    "description": "Print text at the cursor (KERNAL CHROUT)"
+  },
+  ".print_char": {
+    "prefix": ".print_char",
+    "body": [".print_char ${1:\\$41}"],
+    "description": "Print one character"
+  },
+  ".print_hex": {
+    "prefix": ".print_hex",
+    "body": [".print_hex ${1|A,X,Y|}"],
+    "description": "Print a register as two hex digits"
+  },
+  ".clear_screen": {
+    "prefix": ".clear_screen",
+    "body": [".clear_screen"],
+    "description": "Clear the screen"
+  },
+  ".wait_key": {
+    "prefix": ".wait_key",
+    "body": [".wait_key"],
+    "description": "Wait for a key press"
+  },
+  ".delay": {
+    "prefix": ".delay",
+    "body": [".delay ${1:frames=${2:50}}"],
+    "description": "Wait a number of frames"
+  },
+  ".set_border": {
+    "prefix": ".set_border",
+    "body": [".set_border ${1:0}"],
+    "description": "Set the border color ($D020)"
+  },
+  ".set_bg": {
+    "prefix": ".set_bg",
+    "body": [".set_bg ${1:0}"],
+    "description": "Set the background color ($D021)"
+  },
+  ".irq_setup": {
+    "prefix": ".irq_setup",
+    "body": [".irq_setup handler=${1:my_irq}, raster=\\$${2:FA}"],
+    "description": "Install a raster IRQ handler"
+  },
+  ".rand": {
+    "prefix": ".rand",
+    "body": [".rand"],
+    "description": "Random number in A (SID noise)"
+  },
+  ".wait_raster": {
+    "prefix": ".wait_raster",
+    "body": [".wait_raster \\$${1:FF}"],
+    "description": "Wait until the raster beam reaches the line"
+  },
+  ".sprite_init": {
+    "prefix": ".sprite_init",
+    "body": [".sprite_init ${1:0}, ${2:7}, \\$${3:21}${4:, ${5|multicolor,mono|}}"],
+    "description": ".sprite_init num, color, pointer[, multicolor|mono]"
+  },
+  ".sprite_pos": {
+    "prefix": ".sprite_pos",
+    "body": [".sprite_pos ${1:0}, ${2:152}, ${3:100}"],
+    "description": ".sprite_pos num, x, y"
+  },
+  ".sprite_col": {
+    "prefix": ".sprite_col",
+    "body": [".sprite_col ${1:0}, ${2|sprite,background|}"],
+    "description": "Sprite collision check"
+  },
+  ".sprite_anim": {
+    "prefix": ".sprite_anim",
+    "body": [".sprite_anim ${1:0}, ${2:C100}, ${3:4}, ${4:FB}"],
+    "description": ".sprite_anim spriteNum, frameListAddr, frameCount, zpByte"
+  },
+  ".joystick": {
+    "prefix": ".joystick",
+    "body": [".joystick ${1:2}, ${2:0}"],
+    "description": ".joystick port, sprite — move a sprite with the joystick"
+  },
+  ".mouse": {
+    "prefix": ".mouse",
+    "body": [".mouse ${1:2}, ${2:0}, ${3:FD}, ${4:FE}"],
+    "description": ".mouse port, spriteNum, zpX, zpY — 1351 mouse"
+  },
+  ".box_hit": {
+    "prefix": ".box_hit",
+    "body": [".box_hit \\$${1:FB}, \\$${2:F7}"],
+    "description": "Bounding-box hit test"
+  },
+  ".loadfile": {
+    "prefix": ".loadfile",
+    "body": [".loadfile \"${1:FILENAME}\", ${2:8}${3:, \\$${4:C000}}"],
+    "description": "Load a file from disk"
+  },
+  ".exodecrunch": {
+    "prefix": ".exodecrunch",
+    "body": [".exodecrunch${1: depacker=\\$${2:B000}}"],
+    "description": "Exomizer in-memory decruncher"
+  },
+  ".reu_check": {
+    "prefix": ".reu_check",
+    "body": [".reu_check"],
+    "description": "Detect a RAM Expansion Unit"
+  },
+  ".reu_stash": {
+    "prefix": ".reu_stash",
+    "body": [".reu_stash \\$${1:C000}, \\$${2:0000}, ${3:0}, \\$${4:1000}"],
+    "description": "C64 → REU: c64Addr, reuAddr, bank, length"
+  },
+  ".reu_fetch": {
+    "prefix": ".reu_fetch",
+    "body": [".reu_fetch \\$${1:C000}, \\$${2:0000}, ${3:0}, \\$${4:1000}"],
+    "description": "REU → C64: c64Addr, reuAddr, bank, length"
+  },
+  ".reu_swap": {
+    "prefix": ".reu_swap",
+    "body": [".reu_swap \\$${1:C000}, \\$${2:0000}, ${3:0}, \\$${4:1000}"],
+    "description": "Swap C64 and REU memory"
+  },
+  ".turbo_set": {
+    "prefix": ".turbo_set",
+    "body": [".turbo_set ${1:7},${2:0}"],
+    "description": "Set the turbo speed (0–15) and the badline mode"
+  },
+  ".turbo_enable": {
+    "prefix": ".turbo_enable",
+    "body": [".turbo_enable ${1|on,off|}"],
+    "description": "Turn the turbo on / off"
+  },
+  ".supercpu_detect": {
+    "prefix": ".supercpu_detect",
+    "body": [".supercpu_detect"],
+    "description": "Detect a SuperCPU"
+  },
+  ".map_copy": {
+    "prefix": ".map_copy",
+    "body": [".map_copy \\$${1:C000}, \\$${2:0400}, ${3:1000}${4:, auto, \\$D800}"],
+    "description": ".map_copy src, dst, size[, colorSrc|auto, colorDst]"
+  },
+  ".map_copy16x16": {
+    "prefix": ".map_copy16x16",
+    "body": [".map_copy16x16 \\$${1:3000}, ${2:12}, ${3:4}"],
+    "description": "Draw a map of 16×16 tiles"
+  },
+  ".score_bcd": {
+    "prefix": ".score_bcd",
+    "body": [".score_bcd \\$${1:C200}, ${2:4}, ${3:100}, \\$${4:0400}"],
+    "description": "Add to a BCD score and print it"
+  },
+
+  "Clear screen loop": {
+    "prefix": "clearloop",
+    "body": [
+      "    lda #\\$20",
+      "    ldx #\\$00",
+      "${1:clear}:",
+      "    sta \\$0400,x",
+      "    sta \\$0500,x",
+      "    sta \\$0600,x",
+      "    sta \\$06E8,x",
+      "    inx",
+      "    bne ${1}"
+    ],
+    "description": "Clear the screen with a hand-written loop"
+  },
+  "Wait for raster line": {
+    "prefix": "rasterwait",
+    "body": [
+      "${1:wait}:",
+      "    lda \\$D012",
+      "    cmp #\\$${2:FF}",
+      "    bne ${1}"
+    ],
+    "description": "Busy-wait for a raster line"
+  },
+  "Raster IRQ setup": {
+    "prefix": "irq",
+    "body": [
+      "    sei",
+      "    lda #\\$7F",
+      "    sta \\$DC0D          ; CIA1 IRQs off",
+      "    sta \\$DD0D          ; CIA2 NMIs off",
+      "    lda \\$DC0D",
+      "    lda \\$DD0D",
+      "    lda #\\$01",
+      "    sta \\$D01A          ; raster IRQ on",
+      "    lda #\\$${1:FA}",
+      "    sta \\$D012",
+      "    lda \\$D011",
+      "    and #\\$7F",
+      "    sta \\$D011",
+      "    lda #<${2:irq}",
+      "    sta \\$0314",
+      "    lda #>${2}",
+      "    sta \\$0315",
+      "    cli",
+      "    rts",
+      "",
+      "${2}:",
+      "    asl \\$D019          ; ack",
+      "    ${0}",
+      "    jmp \\$EA31"
+    ],
+    "description": "Raster IRQ through the KERNAL vector $0314"
+  },
+  "Main loop": {
+    "prefix": "mainloop",
+    "body": [
+      "${1:main_loop}:",
+      "    .wait_raster \\$FF",
+      "    ${0}",
+      "    jmp ${1}"
+    ],
+    "description": "Frame-synced main loop"
+  },
+  "Sprite data": {
+    "prefix": "spritedata",
+    "body": [
+      "* = \\$${1:2000}",
+      "${2:sprite}:",
+      "    .fill 63, \\$00",
+      "    .byte \\$00"
+    ],
+    "description": "A 64-byte sprite block"
+  }
+}

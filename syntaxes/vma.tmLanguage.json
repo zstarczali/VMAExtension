@@ -1,0 +1,370 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "VMA",
+  "scopeName": "source.vma",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#label-definitions" },
+    { "include": "#org" },
+    { "include": "#definitions" },
+    { "include": "#macro-calls" },
+    { "include": "#conditionals" },
+    { "include": "#data-directives" },
+    { "include": "#directives" },
+    { "include": "#library-macros" },
+    { "include": "#mnemonics" },
+    { "include": "#macro-params" },
+    { "include": "#registers" },
+    { "include": "#numbers" },
+    { "include": "#functions" },
+    { "include": "#options" },
+    { "include": "#local-labels" },
+    { "include": "#operators" },
+    { "include": "#identifiers" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.semicolon.vma",
+          "match": ";.*$"
+        },
+        {
+          "name": "comment.line.double-slash.vma",
+          "match": "//.*$"
+        }
+      ]
+    },
+
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.vma",
+          "begin": "@?\"",
+          "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.vma" } },
+          "end": "\"",
+          "endCaptures": { "0": { "name": "punctuation.definition.string.end.vma" } },
+          "patterns": [
+            {
+              "name": "constant.character.escape.vma",
+              "match": "\\\\(n|r|t|\\\\|\"|\\$[0-9A-Fa-f]{2})"
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.char.vma",
+          "match": "'[^']'"
+        }
+      ]
+    },
+
+    "label-definitions": {
+      "patterns": [
+        {
+          "comment": "name:  .local:  @name:  (scope `name: {` too)",
+          "match": "^\\s*([.@]?[A-Za-z_][\\w.]*)(:)(?!\\s*=)",
+          "captures": {
+            "1": { "name": "entity.name.function.label.vma" },
+            "2": { "name": "punctuation.separator.label.vma" }
+          }
+        },
+        {
+          "comment": "anonymous label - / + (alone or in front of an instruction)",
+          "match": "^\\s*([-+]+)(?=\\s|;|//|$)",
+          "captures": {
+            "1": { "name": "entity.name.function.label.anonymous.vma" }
+          }
+        }
+      ]
+    },
+
+    "org": {
+      "patterns": [
+        {
+          "comment": "* = $1000   *=$1000 \"segment\"",
+          "match": "^\\s*(\\*)\\s*(=)",
+          "captures": {
+            "1": { "name": "keyword.control.directive.org.vma" },
+            "2": { "name": "keyword.operator.assignment.vma" }
+          }
+        },
+        {
+          "match": "(?i)(\\.pc)\\s*(=)",
+          "captures": {
+            "1": { "name": "keyword.control.directive.org.vma" },
+            "2": { "name": "keyword.operator.assignment.vma" }
+          }
+        }
+      ]
+    },
+
+    "definitions": {
+      "patterns": [
+        {
+          "comment": ".macro name  /  .macro name(p1, p2) {",
+          "match": "(?i)(\\.macro)\\s+([A-Za-z_]\\w*)",
+          "captures": {
+            "1": { "name": "keyword.other.directive.macro.vma" },
+            "2": { "name": "entity.name.function.macro.vma" }
+          }
+        },
+        {
+          "comment": ".const NAME = …  /  .label NAME = …",
+          "match": "(?i)(\\.(?:const|label))\\s+([A-Za-z_]\\w*)",
+          "captures": {
+            "1": { "name": "storage.modifier.const.vma" },
+            "2": { "name": "variable.other.constant.vma" }
+          }
+        },
+        {
+          "comment": ".var name[, size]",
+          "match": "(?i)(\\.var)\\s+([A-Za-z_]\\w*)",
+          "captures": {
+            "1": { "name": "storage.type.var.vma" },
+            "2": { "name": "variable.other.vma" }
+          }
+        },
+        {
+          "comment": ".define DEBUG, PAL",
+          "match": "(?i)(\\.define)\\b(.*?)(?=;|//|$)",
+          "captures": {
+            "1": { "name": "keyword.other.directive.define.vma" },
+            "2": { "name": "variable.other.constant.define.vma" }
+          }
+        },
+        {
+          "comment": ".region name / .endregion",
+          "match": "(?i)(\\.region)\\b(.*?)(?=;|//|$)",
+          "captures": {
+            "1": { "name": "keyword.other.directive.region.vma" },
+            "2": { "name": "entity.name.section.vma" }
+          }
+        },
+        {
+          "comment": "NAME = value  (constant assignment at line start)",
+          "match": "^\\s*([A-Za-z_]\\w*)\\s*(=)(?!=)",
+          "captures": {
+            "1": { "name": "variable.other.constant.vma" },
+            "2": { "name": "keyword.operator.assignment.vma" }
+          }
+        },
+        {
+          "comment": ":my_label at the end of a .string / .data / .rawbytes … line",
+          "match": "(?<=\\s)(:)([A-Za-z_]\\w*)\\s*(?=;|//|$)",
+          "captures": {
+            "1": { "name": "punctuation.separator.label.vma" },
+            "2": { "name": "entity.name.function.label.macrolabel.vma" }
+          }
+        }
+      ]
+    },
+
+    "macro-calls": {
+      "patterns": [
+        {
+          "comment": ".invoke name(args)  /  .call name(args)",
+          "match": "(?i)(\\.(?:invoke|call))\\s+([A-Za-z_]\\w*)",
+          "captures": {
+            "1": { "name": "keyword.other.directive.invoke.vma" },
+            "2": { "name": "entity.name.function.macro.call.vma" }
+          }
+        },
+        {
+          "comment": ":name(args) — Kick-style macro call",
+          "match": "(?<![\\w)])(:)([A-Za-z_]\\w*)(?=\\s*\\()",
+          "captures": {
+            "1": { "name": "punctuation.definition.macro.vma" },
+            "2": { "name": "entity.name.function.macro.call.vma" }
+          }
+        }
+      ]
+    },
+
+    "conditionals": {
+      "patterns": [
+        {
+          "comment": "assembly-time and runtime control flow, loop helpers",
+          "name": "keyword.control.conditional.vma",
+          "match": "(?i)(?<![\\w.])\\.(if|else|endif|while|endw|repeat|until|loop|next|for|endf|assert|end|endm|endmacro|endregion)\\b"
+        }
+      ]
+    },
+
+    "data-directives": {
+      "patterns": [
+        {
+          "name": "storage.type.data.vma",
+          "match": "(?i)(?<![\\w.])\\.(byte|word|fill|align|text|string|data|rawbytes|rawtext|petscii|charset|chardef|table|encoding)\\b"
+        }
+      ]
+    },
+
+    "directives": {
+      "patterns": [
+        {
+          "name": "keyword.other.directive.vma",
+          "match": "(?i)(?<![\\w.])\\.(incbin|koala|level_row|level|sid_player|sid|include|push|pull|org)\\b"
+        }
+      ]
+    },
+
+    "library-macros": {
+      "patterns": [
+        {
+          "comment": "C64 Visual Assembler library macros",
+          "name": "support.function.library.vma",
+          "match": "(?i)(?<![\\w.])\\.(memcpy|memset|print_char|print_hex|print|clear_screen|wait_key|wait_raster|delay|wait|set_border|set_bg|irq_setup|rand|sprite_init|sprite_pos|sprite_col|sprite_anim|joystick|mouse|loadfile|exodecrunch|reu_check|reu_stash|reu_fetch|reu_swap|turbo_set|turbo_enable|supercpu_detect|map_copy16x16|map_copy|score_bcd|box_hit)\\b"
+        }
+      ]
+    },
+
+    "mnemonics": {
+      "patterns": [
+        {
+          "comment": "jumps, branches and returns (long branches too)",
+          "match": "(?i)(?<![\\w.@$%#])(jmp|jsr|rts|rti|brk|bcc|bcs|beq|bmi|bne|bpl|bvc|bvs|lbcc|lbcs|lbeq|lbmi|lbne|lbpl|lbvc|lbvs)(\\.(?:abs|a|zp|z))?(?![\\w])(?:\\s+(\\.[A-Za-z_]\\w*|[-+]+(?=\\s*(?:;|//|$))))?",
+          "captures": {
+            "1": { "name": "keyword.control.jump.mnemonic.vma" },
+            "2": { "name": "storage.modifier.suffix.vma" },
+            "3": { "name": "entity.name.function.label.local.vma" }
+          }
+        },
+        {
+          "comment": "documented 6502 instructions",
+          "match": "(?i)(?<![\\w.@$%#])(adc|and|asl|bit|clc|cld|cli|clv|cmp|cpx|cpy|dec|dex|dey|eor|inc|inx|iny|lda|ldx|ldy|lsr|nop|ora|pha|php|pla|plp|rol|ror|sbc|sec|sed|sei|sta|stx|sty|tax|tay|tsx|txa|txs|tya)(\\.(?:abs|a|zp|z))?(?![\\w])(?:\\s+(\\.[A-Za-z_]\\w*|[-+]+(?=\\s*(?:;|//|$))))?",
+          "captures": {
+            "1": { "name": "keyword.other.mnemonic.vma" },
+            "2": { "name": "storage.modifier.suffix.vma" },
+            "3": { "name": "entity.name.function.label.local.vma" }
+          }
+        },
+        {
+          "comment": "NMOS illegal / undocumented opcodes and their aliases",
+          "match": "(?i)(?<![\\w.@$%#])(ahx|alr|anc|ane|arr|asr|axs|dcm|dcp|ins|isb|isc|lae|las|lax|lds|lxa|rla|rra|sax|sbx|sha|shs|shx|shy|slo|sre|tas|xaa)(\\.(?:abs|a|zp|z))?(?![\\w])(?:\\s+(\\.[A-Za-z_]\\w*|[-+]+(?=\\s*(?:;|//|$))))?",
+          "captures": {
+            "1": { "name": "keyword.other.mnemonic.illegal.vma" },
+            "2": { "name": "storage.modifier.suffix.vma" },
+            "3": { "name": "entity.name.function.label.local.vma" }
+          }
+        }
+      ]
+    },
+
+    "macro-params": {
+      "patterns": [
+        {
+          "name": "variable.parameter.macro.vma",
+          "match": "\\{[A-Za-z_]\\w*\\}"
+        }
+      ]
+    },
+
+    "registers": {
+      "patterns": [
+        {
+          "comment": ",X  ,Y  in indexed addressing",
+          "match": "(,)\\s*([xXyY])\\b",
+          "captures": {
+            "1": { "name": "punctuation.separator.vma" },
+            "2": { "name": "variable.language.register.vma" }
+          }
+        },
+        {
+          "comment": "register names in runtime conditions and .push / .pull / .print_hex",
+          "name": "variable.language.register.vma",
+          "match": "\\b([AXY]|AXY|AX|AY|XY)\\b(?=\\s*(==|!=|<=|>=|<|>|;|//|$))"
+        }
+      ]
+    },
+
+    "numbers": {
+      "patterns": [
+        {
+          "name": "keyword.operator.immediate.vma",
+          "match": "#"
+        },
+        {
+          "name": "constant.numeric.hex.vma",
+          "match": "\\$[0-9A-Fa-f]+\\b"
+        },
+        {
+          "name": "constant.numeric.binary.vma",
+          "match": "%[01]+\\b"
+        },
+        {
+          "name": "constant.numeric.decimal.vma",
+          "match": "(?<![\\w$])\\d+(\\.\\d+)?\\b"
+        }
+      ]
+    },
+
+    "functions": {
+      "patterns": [
+        {
+          "name": "support.function.math.vma",
+          "match": "(?i)\\b(lo|hi|sin|cos|round|min|max|abs)(?=\\s*\\()"
+        },
+        {
+          "name": "constant.language.pi.vma",
+          "match": "\\bPI\\b"
+        }
+      ]
+    },
+
+    "options": {
+      "patterns": [
+        {
+          "comment": "keyword arguments of the directives and library macros",
+          "name": "constant.language.option.vma",
+          "match": "(?i)(?<![\\w.$])(lower|upper|multicolor|mono|null|sprite|background|on|off|auto|screencode_mixed|screencode_upper|petscii_mixed|petscii_upper|ascii)\\b(?!\\s*:)"
+        },
+        {
+          "comment": "named arguments: src= dst= size= addr= value= frames= handler= raster= depacker=",
+          "match": "(?i)\\b(src|dst|size|addr|value|frames|handler|raster|depacker)(\\s*=)(?!=)",
+          "captures": {
+            "1": { "name": "variable.parameter.named.vma" },
+            "2": { "name": "keyword.operator.assignment.vma" }
+          }
+        }
+      ]
+    },
+
+    "local-labels": {
+      "patterns": [
+        {
+          "comment": ".loop referenced as an operand (any other dotted name)",
+          "name": "entity.name.function.label.local.vma",
+          "match": "(?<![\\w$])\\.[A-Za-z_]\\w*"
+        }
+      ]
+    },
+
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.comparison.vma",
+          "match": "==|!=|<=|>="
+        },
+        {
+          "name": "keyword.operator.bitwise.shift.vma",
+          "match": "<<|>>"
+        },
+        {
+          "comment": "< / > low / high byte, arithmetic and bitwise operators, * as PC or multiply",
+          "name": "keyword.operator.vma",
+          "match": "[-+*/%&|^~<>=!]"
+        }
+      ]
+    },
+
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "variable.other.label.vma",
+          "match": "@?[A-Za-z_][\\w]*(\\.[A-Za-z_]\\w*)*"
+        }
+      ]
+    }
+  }
+}
