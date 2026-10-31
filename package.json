@@ -2,7 +2,7 @@
   "name": "vma-assembler",
   "displayName": "VMA — Visual Macro Assembler",
   "description": "Language support for VMA (Visual Macro Assembler) — the 6502 / 6510 assembler of C64 Visual Assembler",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "zsolt-tarczali",
   "author": {
     "name": "Zsolt Tarczali"
@@ -258,18 +258,22 @@
         },
         "vma.viceArgs": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": [],
           "description": "Extra command-line arguments passed to VICE (e.g. [\"-fullscreen\", \"-joydev2\", \"4\"])"
         },
         "vma.defaultOutputDir": {
           "type": "string",
           "default": "",
-          "description": "Default output directory for the built .prg / .d64 / .crt files (empty = same directory as source file)"
+          "description": "Output directory for the built .prg / .d64 / .crt files; created if missing. Absolute, or relative to the workspace folder (e.g. ./samples/out); ${workspaceFolder} also works. Empty = same directory as source file."
         },
         "vma.searchDirs": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": [],
           "description": "Further folders where .incbin / .koala / .level / .sid / .include files are looked up after the source's folder (passed via --search)"
         },
@@ -280,7 +284,9 @@
         },
         "vma.d64AddFiles": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": [],
           "description": "Extra files to put on the .d64 disk image when using the D64 commands (passed via --add)"
         },
@@ -301,7 +307,11 @@
         },
         "vma.exomizerMode": {
           "type": "string",
-          "enum": ["sfx sys", "sfx basic", "mem"],
+          "enum": [
+            "sfx sys",
+            "sfx basic",
+            "mem"
+          ],
           "default": "sfx sys",
           "description": "Exomizer compression mode: 'sfx sys' (self-extractor, SYS start), 'sfx basic' (self-extractor, BASIC start), 'mem' (raw compressed data)"
         },

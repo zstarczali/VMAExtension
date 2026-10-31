@@ -87,7 +87,7 @@ Every build adds `--search DIR` for each `vma.searchDirs` entry and `--no-basic-
 | `vma.compilerPath` | `vma` | Full path to the `vma` executable |
 | `vma.vicePath` | `x64sc` | Full path to the VICE C64 emulator executable |
 | `vma.viceArgs` | `[]` | Extra arguments passed to VICE, e.g. `["-fullscreen"]` |
-| `vma.defaultOutputDir` | *(source directory)* | Output directory for the `.prg` / `.d64` / `.crt` files |
+| `vma.defaultOutputDir` | *(source directory)* | Output directory for the `.prg` / `.d64` / `.crt` files, created if missing. Absolute or relative to the workspace folder (e.g. `./samples/out`) |
 | `vma.searchDirs` | `[]` | Further folders for `.incbin` / `.koala` / `.level` / `.sid` / `.include` (`--search`) |
 | `vma.basicStub` | `true` | `false` passes `--no-basic-stub` (no `10 SYS` line) |
 | `vma.d64AddFiles` | `[]` | Extra files on the `.d64` image (`--add` for each) |
