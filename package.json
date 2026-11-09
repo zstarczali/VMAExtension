@@ -2,7 +2,7 @@
   "name": "vma-assembler",
   "displayName": "VMA — Visual Macro Assembler",
   "description": "Language support for VMA (Visual Macro Assembler) — the 6502 / 6510 assembler of C64 Visual Assembler",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "zsolt-tarczali",
   "author": {
     "name": "Zsolt Tarczali"
