@@ -6,6 +6,8 @@ All notable changes to the VMA extension are listed here.
 
 ### Fixed
 - The Marketplace package now carries this changelog (0.1.2 was uploaded without it).
+- README: a *Getting started* section for the Marketplace install replaces the local `.vsix` instructions,
+  which moved to *Building from source*.
 
 ## [0.1.2] — 2026-11-09
 

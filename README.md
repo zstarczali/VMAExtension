@@ -9,20 +9,16 @@ directive and library macro, an outline, and one-click build & run in VICE — a
 
 ---
 
-## Installation
+## Getting started
 
-If you have a local `.vsix` package, install it with:
-
-```bash
-code --install-extension /path/to/vma-assembler-0.1.3.vsix
-```
-
-## Create a VSIX
-
-```bash
-npm ci
-npx @vscode/vsce package
-```
+1. Install the extension from the Extensions view (search for **VMA**), or from the command line:
+   ```bash
+   code --install-extension zsolt-tarczali.vma-assembler
+   ```
+2. Download the `vma` compiler from the [VMA releases](https://github.com/zstarczali/VMA/releases) and, if it is
+   not on your `PATH`, set `vma.compilerPath` to it. For *Run in VICE* set `vma.vicePath` as well.
+3. Open a `.vma` / `.asm` file and choose **VMA: Build & Run in VICE** from the editor's context menu or the
+   Command Palette.
 
 ## Features
 
@@ -141,6 +137,15 @@ Task properties: `file`, `d64`, `crt`, `noBasicStub`, `raw`, `debug`, `exo`, `ru
 The full language manual is in the VMA repository:
 [English](https://github.com/zstarczali/VMA/blob/main/docs/VMA-Manual.md) ·
 [Magyar](https://github.com/zstarczali/VMA/blob/main/docs/VMA-Manual.hu.md).
+
+## Building from source
+
+```bash
+npm ci
+npx @vscode/vsce package
+```
+
+This creates `vma-assembler-<version>.vsix`; install it with *Extensions: Install from VSIX…*.
 
 ## License
 
