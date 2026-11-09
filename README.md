@@ -14,7 +14,7 @@ directive and library macro, an outline, and one-click build & run in VICE — a
 If you have a local `.vsix` package, install it with:
 
 ```bash
-code --install-extension /path/to/vma-assembler-0.1.2.vsix
+code --install-extension /path/to/vma-assembler-0.1.3.vsix
 ```
 
 ## Create a VSIX

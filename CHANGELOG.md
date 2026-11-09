@@ -2,6 +2,11 @@
 
 All notable changes to the VMA extension are listed here.
 
+## [0.1.3] — 2026-11-09
+
+### Fixed
+- The Marketplace package now carries this changelog (0.1.2 was uploaded without it).
+
 ## [0.1.2] — 2026-11-09
 
 ### Added
@@ -46,6 +51,7 @@ First release, modelled on the Ultimate Basic extension.
   `vma.basicStub`, `vma.d64AddFiles`, `vma.diskName`, `vma.crtName`, `vma.exomizerPath`, `vma.exomizerMode`,
   `vma.exomizerSuffix`.
 
+[0.1.3]: https://github.com/zstarczali/VMAExtension/compare/e126b5a...development
 [0.1.2]: https://github.com/zstarczali/VMAExtension/compare/ede4b0b...e126b5a
 [0.1.1]: https://github.com/zstarczali/VMAExtension/compare/56eb356...ede4b0b
 [0.1.0]: https://github.com/zstarczali/VMAExtension/commit/56eb356
