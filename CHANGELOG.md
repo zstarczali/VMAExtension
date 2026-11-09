@@ -2,6 +2,13 @@
 
 All notable changes to the VMA extension are listed here.
 
+## [0.1.4] — 2026-11-09
+
+### Added
+- The Ultimate 64 palette macros of VMA 2.2: `.u64_palette "file.vpl"` (a directive with a palette file),
+  `.u64_palette_color index, $RRGGBB` and `.u64_palette_reset` (library macros) are highlighted and have snippets.
+- `vma.searchDirs` also serves the palette file of `.u64_palette`.
+
 ## [0.1.3] — 2026-11-09
 
 ### Fixed
