@@ -14,7 +14,7 @@ directive and library macro, an outline, and one-click build & run in VICE — a
 If you have a local `.vsix` package, install it with:
 
 ```bash
-code --install-extension /path/to/vma-assembler-0.1.0.vsix
+code --install-extension /path/to/vma-assembler-0.1.2.vsix
 ```
 
 ## Create a VSIX
@@ -35,6 +35,9 @@ npx @vscode/vsce package
   `rasterwait`, `scope`, `.macrok` (Kick-style `{ }` macro) and more
 - **Outline & Go to Definition** — labels (local labels under their global label), `.const` / `.label`,
   `.var`, `.macro`, `.region`, `.define` and `:macroLabel` names
+- **Folding** — `.region name … .endregion` (and `; region` / `; endregion` comments) fold as regions
+  (*Fold All Regions*: `Ctrl+K Ctrl+8`); `.macro`, `.if` / `.else`, `.loop`, `.for`, `.while`, `.repeat` and
+  `{ }` blocks, label sections and comment blocks fold too
 - **Formatter** — labels in column 0, code indented, `.macro`/`.if`/`.loop`/`.for`/`.while`/`.repeat`/`.region`
   and `{ }` blocks nested
 - **Build commands** — PRG, D64 disk image, Magic Desk CRT, debug symbols (`.sym` / `.vs` / `.dbg`), Exomizer
@@ -87,7 +90,7 @@ Every build adds `--search DIR` for each `vma.searchDirs` entry and `--no-basic-
 | `vma.compilerPath` | `vma` | Full path to the `vma` executable |
 | `vma.vicePath` | `x64sc` | Full path to the VICE C64 emulator executable |
 | `vma.viceArgs` | `[]` | Extra arguments passed to VICE, e.g. `["-fullscreen"]` |
-| `vma.defaultOutputDir` | *(source directory)* | Output directory for the `.prg` / `.d64` / `.crt` files |
+| `vma.defaultOutputDir` | *(source directory)* | Output directory for the `.prg` / `.d64` / `.crt` files, created if missing. Absolute or relative to the workspace folder (e.g. `./samples/out`) |
 | `vma.searchDirs` | `[]` | Further folders for `.incbin` / `.koala` / `.level` / `.sid` / `.include` (`--search`) |
 | `vma.basicStub` | `true` | `false` passes `--no-basic-stub` (no `10 SYS` line) |
 | `vma.d64AddFiles` | `[]` | Extra files on the `.d64` image (`--add` for each) |

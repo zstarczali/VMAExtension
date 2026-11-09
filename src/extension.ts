@@ -12,9 +12,7 @@ function cfg<T>(key: string): T | undefined {
 function compilerPath(): string    { return cfg<string>('compilerPath')    || 'vma'; }
 function vicePath(): string        { return cfg<string>('vicePath')        || 'x64sc'; }
 function viceArgs(): string[]      { return cfg<string[]>('viceArgs')      ?? []; }
-function searchDirs(): string[]    { return (cfg<string[]>('searchDirs')   ?? []).map(expandWorkspace); }
 function basicStub(): boolean      { return cfg<boolean>('basicStub')      ?? true; }
-function d64AddFiles(): string[]   { return cfg<string[]>('d64AddFiles')   ?? []; }
 function diskName(): string        { return cfg<string>('diskName')        ?? ''; }
 function crtName(): string         { return cfg<string>('crtName')         ?? ''; }
 function exomizerPath(): string    { return cfg<string>('exomizerPath')    || 'exomizer'; }
@@ -27,12 +25,38 @@ function expandWorkspace(s: string): string {
     return s.replace(/\$\{workspaceFolder\}/g, ws);
 }
 
+/**
+ * A path from a setting as an absolute path. A relative one means the workspace folder of the
+ * source (the source's folder without a workspace): the background build and the terminal
+ * run from different folders, so it must not depend on the current directory.
+ */
+function resolveSetting(srcFile: string, value: string): string {
+    const root = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(srcFile))?.uri.fsPath ?? path.dirname(srcFile);
+    return path.resolve(root, expandWorkspace(value));
+}
+
+function searchDirs(srcFile: string): string[] {
+    return (cfg<string[]>('searchDirs') ?? []).map(d => resolveSetting(srcFile, d));
+}
+
+function d64AddFiles(srcFile: string): string[] {
+    return (cfg<string[]>('d64AddFiles') ?? []).map(f => resolveSetting(srcFile, f));
+}
+
+function outputDirFor(srcFile: string): string {
+    const outDir = (cfg<string>('defaultOutputDir') ?? '').trim();
+    return outDir ? resolveSetting(srcFile, outDir) : path.dirname(srcFile);
+}
+
 type OutExt ='.prg' | '.d64' | '.crt' | '.vs';
 
 function outputPathFor(srcFile: string, ext: OutExt): string {
-    const outDir = cfg<string>('defaultOutputDir') ?? '';
-    const base   = path.basename(srcFile, path.extname(srcFile)) + ext;
-    return outDir ? path.join(outDir, base) : path.join(path.dirname(srcFile), base);
+    return path.join(outputDirFor(srcFile), path.basename(srcFile, path.extname(srcFile)) + ext);
+}
+
+/** The compiler does not create folders: the configured output folder may not exist yet. */
+function ensureOutputDir(srcFile: string) {
+    fs.mkdirSync(outputDirFor(srcFile), { recursive: true });
 }
 
 function exoOutputFor(prg: string): string {
@@ -127,7 +151,7 @@ function outputsFor(src: string, opts: BuildOptions): BuildOutputs {
 /** Build args as string[] for child_process.spawn (unquoted) */
 function buildArgs(src: string, out: BuildOutputs, opts: BuildOptions): string[] {
     const args = ['build', src, '-o', out.prg];
-    for (const d of searchDirs()) { args.push('--search', d); }
+    for (const d of searchDirs(src)) { args.push('--search', d); }
     if (opts.noBasicStub || !basicStub()) { args.push('--no-basic-stub'); }
     if (opts.raw)   { args.push('--raw'); }
     if (opts.debug) { args.push('--debug'); }
@@ -137,7 +161,7 @@ function buildArgs(src: string, out: BuildOutputs, opts: BuildOptions): string[]
     }
     if (out.d64) {
         args.push('--d64', out.d64);
-        for (const f of d64AddFiles()) { args.push('--add', f); }
+        for (const f of d64AddFiles(src)) { args.push('--add', f); }
         if (diskName()) { args.push('--disk-name', diskName()); }
     }
     return args;
@@ -179,6 +203,7 @@ function launchVice(target: string, cwd: string, monCommands?: string) {
  * compiler exits with 0 and `file` exists, `then` is called.
  */
 function spawnBuild(src: string, out: BuildOutputs, opts: BuildOptions, file: string, then: () => void) {
+    ensureOutputDir(src);
     const t = getTerminal();
     t.show(true);
 
@@ -259,6 +284,7 @@ function buildAndExo(src: string, launch: boolean) {
 
 function cmdBuild(opts: BuildOptions = {}) {
     const f = requireVmaFile(); if (!f) { return; }
+    ensureOutputDir(f.src);
     runInTerminal(buildCommand(f.src, outputsFor(f.src, opts), opts));
 }
 
@@ -284,6 +310,7 @@ function makeTask(
 ): vscode.Task {
     const out = outputsFor(src, opts);
     const exo = exoOutputFor(out.prg);
+    ensureOutputDir(src);
 
     let shellCmd = buildCommand(src, out, opts);
     if (opts.exo) {
@@ -510,6 +537,126 @@ async function cmdFormat() {
     }
 }
 
+// ── Folding ───────────────────────────────────────────────────────────────────
+
+/** The block a closer directive ends */
+const CLOSER_OF: Record<string, string> = {
+    endm: 'macro', endmacro: 'macro', endif: 'if', next: 'loop', endf: 'for',
+    endw: 'while', until: 'repeat', endregion: 'region',
+};
+/** `; region name` / `// region name` and their `endregion` */
+const COMMENT_REGION    = /^(;|\/\/)\s*region\b/i;
+const COMMENT_ENDREGION = /^(;|\/\/)\s*endregion\b/i;
+
+interface FoldFrame {
+    kind: string;          // 'root', 'region', 'macro', 'if', 'loop', … or '{'
+    start: number;         // the opener line
+    label?: number;        // the open label section in this block
+}
+
+/**
+ * Folding ranges:
+ *  - `.region name … .endregion` (and `; region` / `; endregion` comments) —
+ *    region kind, so *Fold All Regions* (Ctrl+K Ctrl+8) folds them;
+ *  - `.macro … .endm`, `.if … .else … .endif`, `.loop … .next`, `.for … .endf`,
+ *    `.while … .endw`, `.repeat … .until` and `{ … }` blocks;
+ *  - a global label to the line before the next label of the same block;
+ *  - runs of two or more full-line comments.
+ */
+class VmaFoldingProvider implements vscode.FoldingRangeProvider {
+    provideFoldingRanges(document: vscode.TextDocument): vscode.FoldingRange[] {
+        const ranges: vscode.FoldingRange[] = [];
+        const frames: FoldFrame[] = [{ kind: 'root', start: 0 }];
+        const top = () => frames[frames.length - 1];
+        let commentStart = -1;
+
+        const blank = (i: number) => document.lineAt(i).text.trim() === '';
+        const add = (start: number, end: number, kind?: vscode.FoldingRangeKind) => {
+            while (end > start && blank(end)) { end--; }
+            if (end > start) { ranges.push(new vscode.FoldingRange(start, end, kind)); }
+        };
+        const closeLabel = (frame: FoldFrame, before: number) => {
+            if (frame.label !== undefined) { add(frame.label, before - 1); frame.label = undefined; }
+        };
+        // a block inside a label section nests in it: the section stays open
+        const open = (kind: string, line: number) => { frames.push({ kind, start: line }); };
+        const close = (kind: string, line: number) => {
+            // the nearest open block of that kind; unmatched closers are ignored
+            let at = frames.length - 1;
+            while (at > 0 && frames[at].kind !== kind) { at--; }
+            if (at === 0) { return; }
+            while (frames.length > at) {
+                const f = frames.pop()!;
+                closeLabel(f, line);
+                // the closer line stays visible
+                add(f.start, line - 1, f.kind === 'region' ? vscode.FoldingRangeKind.Region : undefined);
+            }
+        };
+
+        for (let i = 0; i < document.lineCount; i++) {
+            const trimmed = document.lineAt(i).text.trim();
+            const code    = stripTrailingComment(trimmed);
+
+            // runs of full-line comments (region markers excluded)
+            const isComment = trimmed !== '' && code === ''
+                && !COMMENT_REGION.test(trimmed) && !COMMENT_ENDREGION.test(trimmed);
+            if (isComment) {
+                if (commentStart < 0) { commentStart = i; }
+            } else {
+                if (commentStart >= 0 && i - 1 > commentStart) {
+                    ranges.push(new vscode.FoldingRange(commentStart, i - 1, vscode.FoldingRangeKind.Comment));
+                }
+                commentStart = -1;
+            }
+
+            if (COMMENT_REGION.test(trimmed))    { open('region', i);  continue; }
+            if (COMMENT_ENDREGION.test(trimmed)) { close('region', i); continue; }
+            if (code === '') { continue; }
+
+            const label = LABEL_DEF.exec(code);
+            const stmt  = label ? code.slice(label[0].length).trim() : code;
+
+            let m: RegExpExecArray | null;
+            if (stmt.startsWith('}')) {
+                close('{', i);
+            } else if ((m = BLOCK_CLOSE.exec(stmt))) {
+                close(CLOSER_OF[m[1].toLowerCase()], i);
+            } else if (/^\.else\b/i.test(stmt) && top().kind === 'if') {
+                // the .if part folds up to the .else; the .else part to the .endif
+                const f = top();
+                closeLabel(f, i);
+                add(f.start, i - 1);
+                f.start = i;
+            }
+
+            // `.macro name(p) {` is closed by `}`, not by .endm
+            if (/\{\s*$/.test(stmt)) {
+                open('{', i);
+            } else if ((m = BLOCK_OPEN.exec(stmt))) {
+                open(m[1].toLowerCase(), i);
+            } else if (label && !label[1].startsWith('.')) {
+                // a global label starts a section of the enclosing block
+                closeLabel(top(), i);
+                top().label = i;
+            } else if (ORG_LINE.test(code)) {
+                closeLabel(top(), i);
+            }
+        }
+
+        if (commentStart >= 0 && document.lineCount - 1 > commentStart) {
+            ranges.push(new vscode.FoldingRange(commentStart, document.lineCount - 1, vscode.FoldingRangeKind.Comment));
+        }
+        // unclosed blocks fold to the end of the file
+        for (const f of frames.reverse()) {
+            closeLabel(f, document.lineCount);
+            if (f.kind !== 'root') {
+                add(f.start, document.lineCount - 1, f.kind === 'region' ? vscode.FoldingRangeKind.Region : undefined);
+            }
+        }
+        return ranges;
+    }
+}
+
 // ── Outline (document symbols) and Go to Definition ──────────────────────────
 
 interface VmaSymbol {
@@ -619,6 +766,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('vma.buildAndRunCrt', () => cmdBuildAndRun({ crt: true })),
         vscode.commands.registerCommand('vma.format',         () => cmdFormat()),
         vscode.languages.registerDocumentFormattingEditProvider(selector, new VmaFormatter()),
+        vscode.languages.registerFoldingRangeProvider(selector, new VmaFoldingProvider()),
         vscode.languages.registerDocumentSymbolProvider(selector, new VmaSymbolProvider()),
         vscode.languages.registerDefinitionProvider(selector, new VmaDefinitionProvider()),
         vscode.tasks.registerTaskProvider('vma', new VmaTaskProvider()),
