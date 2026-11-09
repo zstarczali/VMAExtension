@@ -449,6 +449,21 @@
     "body": [".turbo_set ${1:7},${2:0}"],
     "description": "Set the turbo speed (0–15) and the badline mode"
   },
+  ".u64_palette": {
+    "prefix": ".u64_palette",
+    "body": [".u64_palette \"${1:palette.vpl}\""],
+    "description": "Load a palette file (.vpl, .gpl, .act) into the Ultimate 64 / C64U video palette (Command Interface, firmware 3.15+)"
+  },
+  ".u64_palette_color": {
+    "prefix": ".u64_palette_color",
+    "body": [".u64_palette_color ${1:6}, \\$${2:3050C0}"],
+    "description": "Set one Ultimate 64 / C64U palette colour: index 0–15, $RRGGBB"
+  },
+  ".u64_palette_reset": {
+    "prefix": ".u64_palette_reset",
+    "body": [".u64_palette_reset"],
+    "description": "Restore the palette set in the Ultimate 64 / C64U menu"
+  },
   ".turbo_enable": {
     "prefix": ".turbo_enable",
     "body": [".turbo_enable ${1|on,off|}"],
