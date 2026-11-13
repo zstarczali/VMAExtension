@@ -2,6 +2,16 @@
 
 All notable changes to the VMA extension are listed here.
 
+## [0.1.5] — 2026-11-13
+
+*VMA 2.3.0*: local labels named with their global label.
+
+### Added
+- **Go to Definition** on `Second.lp` (a local label named with its global label, which VMA 2.3 also takes as an
+  absolute operand: `JMP Second.lp`, `LDA Second.lp+1,X`): on the local part it jumps to `Second`'s `.lp`, on
+  the global part to `Second`.
+- README: status badges (Marketplace, GitHub, the `vma` compiler).
+
 ## [0.1.4] — 2026-11-09
 
 ### Added

@@ -731,9 +731,19 @@ class VmaSymbolProvider implements vscode.DocumentSymbolProvider {
 
 class VmaDefinitionProvider implements vscode.DefinitionProvider {
     provideDefinition(document: vscode.TextDocument, position: vscode.Position): vscode.Location | undefined {
-        const range = document.getWordRangeAtPosition(position, /[.@]?[A-Za-z_][\w]*/);
+        // `Second.lp` (VMA 2.3: a local label named with its global label, also as an absolute operand)
+        const range = document.getWordRangeAtPosition(position, /[.@]?[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*/);
         if (!range) { return; }
         let word = document.getText(range);
+        const dot = word.indexOf('.', 1);
+        if (dot > 0) {
+            // on the global part: the global label; on a local part: that qualified name
+            const end = word.indexOf('.', position.character - range.start.character + 1);
+            word = position.character - range.start.character < dot ? word.slice(0, dot) : (end < 0 ? word : word.slice(0, end));
+            const symbols = collectSymbols(document);
+            const hit = symbols.find(s => s.name === word) ?? symbols.find(s => s.name.toLowerCase() === word.toLowerCase());
+            return hit && new vscode.Location(document.uri, new vscode.Position(hit.line, hit.col));
+        }
         // `.loop` → the local label under the nearest global label above
         if (word.startsWith('.')) {
             const symbols = collectSymbols(document);
