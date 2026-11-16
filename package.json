@@ -7,7 +7,7 @@
   "author": {
     "name": "Zsolt Tarczali"
   },
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.60.0"
   },
