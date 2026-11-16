@@ -5,7 +5,7 @@
   <a href="https://marketplace.visualstudio.com/items?itemName=zsolt-tarczali.vma-assembler"><img src="https://vsmarketplacebadges.dev/version-short/zsolt-tarczali.vma-assembler.svg?label=Marketplace&color=007ACC" alt="VS Marketplace version"></a>
   <a href="https://marketplace.visualstudio.com/items?itemName=zsolt-tarczali.vma-assembler"><img src="https://vsmarketplacebadges.dev/installs-short/zsolt-tarczali.vma-assembler.svg?color=007ACC" alt="Installs"></a>
   <a href="https://github.com/zstarczali/VMAExtension/blob/main/package.json"><img src="https://img.shields.io/github/package-json/v/zstarczali/VMAExtension/main?label=version&color=4c1" alt="Version"></a>
-  <a href="https://github.com/zstarczali/VMAExtension/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPLv3-blue" alt="License: GPLv3"></a>
+  <a href="https://github.com/zstarczali/VMAExtension/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
   <a href="https://www.c64va.pro/register/donate.php"><img src="https://img.shields.io/badge/donate-PayPal-00457C?logo=paypal&logoColor=white" alt="Donate"></a>
 </p>
 <p align="center">
@@ -174,4 +174,4 @@ This creates `vma-assembler-<version>.vsix`; install it with *Extensions: Instal
 
 ## License
 
-GPL-3.0-or-later, like VMA and C64 Visual Assembler.
+MIT — see [LICENSE](LICENSE).
