@@ -17,7 +17,8 @@
     "Formatters"
   ],
   "activationEvents": [
-    "onLanguage:vma"
+    "onLanguage:vma",
+    "onCommand:vma.openVasSource"
   ],
   "icon": "images/icon.png",
   "keywords": [
@@ -173,6 +174,20 @@
           "command": "vma.format",
           "group": "vma@9"
         }
+      ],
+      "editor/title": [
+        {
+          "when": "resourceExtname == .vas && resourceScheme == file",
+          "command": "vma.openVasSource",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "resourceExtname == .vas",
+          "command": "vma.openVasSource",
+          "group": "navigation@9"
+        }
       ]
     },
     "commands": [
@@ -241,6 +256,12 @@
         "title": "Format Document",
         "category": "VMA",
         "icon": "$(symbol-keyword)"
+      },
+      {
+        "command": "vma.openVasSource",
+        "title": "Open .vas Project as VMA Source",
+        "category": "VMA",
+        "icon": "$(file-code)"
       }
     ],
     "configuration": {

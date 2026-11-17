@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import * as fs from 'fs';
+import { registerVas } from './vas';
 
 // ── Config helpers ────────────────────────────────────────────────────────────
 
@@ -83,6 +84,10 @@ function requireVmaFile(): { doc: vscode.TextDocument; src: string } | undefined
     }
     if (editor.document.languageId !== 'vma') {
         vscode.window.showErrorMessage('Active file is not a VMA source file.');
+        return;
+    }
+    if (editor.document.uri.scheme !== 'file') {
+        vscode.window.showErrorMessage('This is a read-only view (e.g. of a .vas project) — build it from the Visual Assembler, or save it as a .vma file first.');
         return;
     }
     if (editor.document.isDirty) { editor.document.save(); }
@@ -782,6 +787,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.tasks.registerTaskProvider('vma', new VmaTaskProvider()),
         vscode.window.onDidCloseTerminal(t => { if (t === _terminal) { _terminal = undefined; } })
     );
+    registerVas(context);
 }
 
 export function deactivate() {}
