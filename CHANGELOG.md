@@ -2,6 +2,15 @@
 
 All notable changes to the VMA extension are listed here.
 
+## [Unreleased]
+
+### Added
+- **`.vas` projects, read-only**: *VMA: Open .vas Project as VMA Source* (editor title button on a `.vas`
+  file, Explorer context menu, Command Palette) opens a C64 Visual Assembler project as VMA source with
+  highlighting, outline and folding. The source is the project's `expertText` when it has one, else its `program`
+  blocks converted one line each, in order (`GROUP` / `ENDGROUP` as `.region` / `.endregion`). The view refreshes
+  when the `.vas` changes; the build commands refuse it (it is not a file on disk).
+
 ## [0.1.5] — 2026-11-13
 
 *VMA 2.3.0*: local labels named with their global label.

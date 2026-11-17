@@ -66,6 +66,10 @@ directive and library macro, an outline, and one-click build & run in VICE — a
   VICE monitor (`-moncommands`)
 - **Problems panel** — `FILE:LINE: message` errors of `vma` are picked up by the `$vma` problem matcher
 - **Task integration** — `Ctrl+Shift+B` lists the VMA build tasks
+- **`.vas` projects (read-only)** — *VMA: Open .vas Project as VMA Source* (editor title button on a `.vas`
+  file, Explorer context menu) shows a C64 Visual Assembler project as VMA source with highlighting, outline
+  and folding: its Expert text (`expertText`) as saved, else its blocks (`program`) one line each, in order.
+  The view follows the file when it changes; editing and saving it back is not supported
 
 The `.vma` and `.asm` extensions are registered. If another assembler extension owns `.asm` in your workspace,
 pick the language with *Change Language Mode*, or pin it in `settings.json`:
@@ -99,6 +103,7 @@ pick the language with *Change Language Mode*, or pin it in `settings.json`:
 | VMA: Build + Exomize | … then `exomizer sfx sys -o src_exo.prg src.prg` |
 | VMA: Build + Exomize & Run in VICE | … then `x64sc -autostart src_exo.prg` |
 | VMA: Format Document | |
+| VMA: Open .vas Project as VMA Source | — (read-only view, no build) |
 
 Every build adds `--search DIR` for each `vma.searchDirs` entry and `--no-basic-stub` when `vma.basicStub` is off.
 
